@@ -1,4 +1,5 @@
 import { RouterBroker } from '@api/abstract/abstract.router';
+import { EditMessageRouter } from '@api/extensions/edit/edit.router';
 import { pinController } from '@api/extensions/extensions.module';
 import { HttpStatus } from '@api/routes/index.router';
 import { RequestHandler, Router } from 'express';
@@ -19,6 +20,8 @@ export class MessageExtensionsRouter extends RouterBroker {
 
       return res.status(HttpStatus.OK).json(response);
     });
+
+    this.router.use(new EditMessageRouter(...guards).router);
   }
 
   public readonly router: Router = Router();
