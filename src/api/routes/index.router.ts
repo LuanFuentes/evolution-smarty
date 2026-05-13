@@ -13,6 +13,7 @@ import fs from 'fs';
 import mimeTypes from 'mime-types';
 import path from 'path';
 
+import { CatalogExtensionsRouter } from '../extensions/catalog/catalog.router';
 import { MessageExtensionsRouter } from '../extensions/pin/pin.router';
 import { ChatExtensionsRouter } from '../extensions/star/star.router';
 import { BusinessRouter } from './business.router';
@@ -224,10 +225,12 @@ router
   // son el ÚNICO toque al core router. Las extensiones viven en
   // src/api/extensions/ — git pull upstream/main resuelve los conflicts
   // automático (mismo prefix /chat o /message, distinto router class).
-  //   - ChatExtensionsRouter: POST /chat/starMessage
-  //   - MessageExtensionsRouter: POST /message/pin
+  //   - ChatExtensionsRouter:    POST /chat/starMessage
+  //   - MessageExtensionsRouter: POST /message/pin, POST /message/editMessage
+  //   - CatalogExtensionsRouter: GET  /catalog/find, GET /catalog/findCollections
   .use('/chat', new ChatExtensionsRouter(...guards).router)
   .use('/message', new MessageExtensionsRouter(...guards).router)
+  .use('/catalog', new CatalogExtensionsRouter(...guards).router)
   .use('/business', new BusinessRouter(...guards).router)
   .use('/group', new GroupRouter(...guards).router)
   .use('/template', new TemplateRouter(configService, ...guards).router)
