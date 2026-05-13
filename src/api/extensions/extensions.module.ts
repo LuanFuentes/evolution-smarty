@@ -1,8 +1,6 @@
 import { waMonitor } from '@api/server.module';
 import { Logger } from '@config/logger.config';
 
-import { CatalogController } from './catalog/catalog.controller';
-import { CatalogService } from './catalog/catalog.service';
 import { EditController } from './edit/edit.controller';
 import { EditService } from './edit/edit.service';
 import { PinController } from './pin/pin.controller';
@@ -20,8 +18,5 @@ export const pinController = new PinController(pinService);
 
 const editService = new EditService(waMonitor);
 export const editController = new EditController(editService);
-
-const catalogService = new CatalogService(waMonitor);
-export const catalogController = new CatalogController(catalogService);
 
 logger.info('Extensions Module - ON');
