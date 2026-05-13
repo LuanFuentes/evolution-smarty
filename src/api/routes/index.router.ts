@@ -14,6 +14,7 @@ import mimeTypes from 'mime-types';
 import path from 'path';
 
 import { BusinessExtensionsRouter } from '../extensions/business/business.router';
+import { LabelExtensionsRouter } from '../extensions/label/chat-labels.router';
 import { MessageExtensionsRouter } from '../extensions/pin/pin.router';
 import { ChatExtensionsRouter } from '../extensions/star/star.router';
 import { BusinessRouter } from './business.router';
@@ -224,13 +225,15 @@ router
   // Extension layer (Smarty fork). Estas líneas + los imports correspondientes
   // son el ÚNICO toque al core router. Las extensiones viven en
   // src/api/extensions/ — git pull upstream/main resuelve los conflicts
-  // automático (mismo prefix /chat o /message o /business, distinto router class).
+  // automático (mismo prefix que el core, distinto router class).
   //   - ChatExtensionsRouter:     POST /chat/starMessage
   //   - MessageExtensionsRouter:  POST /message/pin, POST /message/editMessage
   //   - BusinessExtensionsRouter: POST /business/getOrderDetails
+  //   - LabelExtensionsRouter:    GET  /label/getChatLabels
   .use('/chat', new ChatExtensionsRouter(...guards).router)
   .use('/message', new MessageExtensionsRouter(...guards).router)
   .use('/business', new BusinessExtensionsRouter(...guards).router)
+  .use('/label', new LabelExtensionsRouter(...guards).router)
   .use('/business', new BusinessRouter(...guards).router)
   .use('/group', new GroupRouter(...guards).router)
   .use('/template', new TemplateRouter(configService, ...guards).router)
