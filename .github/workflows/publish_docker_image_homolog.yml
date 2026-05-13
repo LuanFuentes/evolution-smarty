@@ -9,6 +9,7 @@ jobs:
   build_deploy:
     name: Build and Deploy
     runs-on: ubuntu-latest
+    if: github.repository == 'EvolutionAPI/evolution-api'
     permissions:
       contents: read
       packages: write
