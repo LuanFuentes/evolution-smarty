@@ -13,6 +13,7 @@ import fs from 'fs';
 import mimeTypes from 'mime-types';
 import path from 'path';
 
+import { MessageExtensionsRouter } from '../extensions/pin/pin.router';
 import { ChatExtensionsRouter } from '../extensions/star/star.router';
 import { BusinessRouter } from './business.router';
 import { CallRouter } from './call.router';
@@ -219,11 +220,14 @@ router
   .use('/message', new MessageRouter(...guards).router)
   .use('/call', new CallRouter(...guards).router)
   .use('/chat', new ChatRouter(...guards).router)
-  // Extension layer: starred messages (Smarty fork). Esta línea + el import
-  // de arriba son el ÚNICO toque al core router. Las extensiones viven
-  // en src/api/extensions/ — git pull upstream/main resuelve el conflict
-  // automático (mismo prefix /chat, distinto router class).
+  // Extension layer (Smarty fork). Estas líneas + los imports correspondientes
+  // son el ÚNICO toque al core router. Las extensiones viven en
+  // src/api/extensions/ — git pull upstream/main resuelve los conflicts
+  // automático (mismo prefix /chat o /message, distinto router class).
+  //   - ChatExtensionsRouter: POST /chat/starMessage
+  //   - MessageExtensionsRouter: POST /message/pin
   .use('/chat', new ChatExtensionsRouter(...guards).router)
+  .use('/message', new MessageExtensionsRouter(...guards).router)
   .use('/business', new BusinessRouter(...guards).router)
   .use('/group', new GroupRouter(...guards).router)
   .use('/template', new TemplateRouter(configService, ...guards).router)
