@@ -62,9 +62,8 @@ jobs:
         run: |
           echo "Triggering Coolify deploy webhook..."
           curl -X GET "${{ secrets.COOLIFY_DEPLOY_WEBHOOK }}" \
+            -H "Authorization: Bearer ${{ secrets.COOLIFY_API_TOKEN }}" \
             --max-time 30 \
             --fail-with-body \
             -o /dev/null \
             -w "HTTP %{http_code}\n"
-        env:
-          COOLIFY_DEPLOY_WEBHOOK: ${{ secrets.COOLIFY_DEPLOY_WEBHOOK }}
