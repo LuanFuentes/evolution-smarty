@@ -56,3 +56,15 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           platforms: linux/amd64
+
+      - name: Trigger Coolify auto-deploy
+        if: github.ref == 'refs/heads/main' && success()
+        run: |
+          echo "Triggering Coolify deploy webhook..."
+          curl -X GET "${{ secrets.COOLIFY_DEPLOY_WEBHOOK }}" \
+            --max-time 30 \
+            --fail-with-body \
+            -o /dev/null \
+            -w "HTTP %{http_code}\n"
+        env:
+          COOLIFY_DEPLOY_WEBHOOK: ${{ secrets.COOLIFY_DEPLOY_WEBHOOK }}
