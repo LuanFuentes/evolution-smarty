@@ -1,5 +1,6 @@
 import { RouterBroker } from '@api/abstract/abstract.router';
 import { starController } from '@api/extensions/extensions.module';
+import { ResyncAppStateRouter } from '@api/extensions/resync-app-state/resync-app-state.router';
 import { HttpStatus } from '@api/routes/index.router';
 import { RequestHandler, Router } from 'express';
 
@@ -19,6 +20,8 @@ export class ChatExtensionsRouter extends RouterBroker {
 
       return res.status(HttpStatus.OK).json(response);
     });
+
+    this.router.use(new ResyncAppStateRouter(...guards).router);
   }
 
   public readonly router: Router = Router();
