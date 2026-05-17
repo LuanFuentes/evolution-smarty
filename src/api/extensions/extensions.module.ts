@@ -9,6 +9,8 @@ import { ChatLabelsController } from './label/chat-labels.controller';
 import { ChatLabelsService } from './label/chat-labels.service';
 import { PinController } from './pin/pin.controller';
 import { PinService } from './pin/pin.service';
+import { PresenceSubscribeController } from './presence-subscribe/presence-subscribe.controller';
+import { PresenceSubscribeService } from './presence-subscribe/presence-subscribe.service';
 import { ResyncAppStateController } from './resync-app-state/resync-app-state.controller';
 import { ResyncAppStateService } from './resync-app-state/resync-app-state.service';
 import { StarController } from './star/star.controller';
@@ -33,5 +35,8 @@ export const chatLabelsController = new ChatLabelsController(chatLabelsService);
 
 const resyncAppStateService = new ResyncAppStateService(waMonitor);
 export const resyncAppStateController = new ResyncAppStateController(resyncAppStateService);
+
+const presenceSubscribeService = new PresenceSubscribeService(waMonitor);
+export const presenceSubscribeController = new PresenceSubscribeController(presenceSubscribeService);
 
 logger.info('Extensions Module - ON');
