@@ -226,7 +226,7 @@ router
   // son el ÚNICO toque al core router. Las extensiones viven en
   // src/api/extensions/ — git pull upstream/main resuelve los conflicts
   // automático (mismo prefix que el core, distinto router class).
-  //   - ChatExtensionsRouter:     POST /chat/starMessage, /chat/resyncAppState, /chat/presenceSubscribe
+  //   - ChatExtensionsRouter:     POST /chat/{starMessage,resyncAppState,presenceSubscribe,debugPrivacyTokens}
   //   - MessageExtensionsRouter:  POST /message/pin, POST /message/editMessage
   //   - BusinessExtensionsRouter: POST /business/getOrderDetails
   //   - LabelExtensionsRouter:    GET  /label/getChatLabels

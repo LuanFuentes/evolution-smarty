@@ -11,6 +11,8 @@ import { PinController } from './pin/pin.controller';
 import { PinService } from './pin/pin.service';
 import { PresenceSubscribeController } from './presence-subscribe/presence-subscribe.controller';
 import { PresenceSubscribeService } from './presence-subscribe/presence-subscribe.service';
+import { PrivacyTokensController } from './privacy-tokens/privacy-tokens.controller';
+import { PrivacyTokensService } from './privacy-tokens/privacy-tokens.service';
 import { ResyncAppStateController } from './resync-app-state/resync-app-state.controller';
 import { ResyncAppStateService } from './resync-app-state/resync-app-state.service';
 import { StarController } from './star/star.controller';
@@ -38,5 +40,8 @@ export const resyncAppStateController = new ResyncAppStateController(resyncAppSt
 
 const presenceSubscribeService = new PresenceSubscribeService(waMonitor);
 export const presenceSubscribeController = new PresenceSubscribeController(presenceSubscribeService);
+
+const privacyTokensService = new PrivacyTokensService(waMonitor);
+export const privacyTokensController = new PrivacyTokensController(privacyTokensService);
 
 logger.info('Extensions Module - ON');
