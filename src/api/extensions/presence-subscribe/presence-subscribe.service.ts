@@ -10,6 +10,9 @@ import { PresenceSubscribeDto } from './presence-subscribe.dto';
 const BAD_GATEWAY = 502;
 const SERVICE_UNAVAILABLE = 503;
 
+// Acepta @lid (privacy mode), @s.whatsapp.net (PN), @c.us (legacy)
+const JID_RE = /@(lid|s\.whatsapp\.net|c\.us)$/;
+
 class BadGatewayException {
   constructor(...objectError: any[]) {
     throw {
@@ -57,20 +60,40 @@ export class PresenceSubscribeService {
       throw new ServiceUnavailableException(`Baileys socket not ready for instance "${instanceName}"`);
     }
 
-    // Resolve number -> JID with the same path sendPresence uses (respeta @lid / @s.whatsapp.net / grupos / broadcast)
-    const isWA = (await waInstance.whatsappNumber({ numbers: [data.number] }))?.shift();
+    // jid exacto tiene prioridad (whatsappNumber devuelve @s.whatsapp.net,
+    // JID equivocado para contactos en modo @lid).
+    let jid: string | undefined;
+    if (data.jid && JID_RE.test(data.jid)) {
+      jid = data.jid;
+    } else if (data.number) {
+      const isWA = (await waInstance.whatsappNumber({ numbers: [data.number] }))?.shift();
+      const candidate = isWA?.jid;
+      const acceptable =
+        isWA?.exists || isJidGroup(candidate) || (candidate ? candidate.includes('@broadcast') : false);
+      if (!candidate || !acceptable) {
+        throw new BadRequestException(isWA ?? `Number "${data.number}" is not on WhatsApp`);
+      }
+      jid = candidate;
+    } else {
+      throw new BadRequestException('Debe enviar "jid" (preferido para @lid) o "number"');
+    }
 
-    const jid = isWA?.jid;
-    const acceptable = isWA?.exists || isJidGroup(jid) || (jid ? jid.includes('@broadcast') : false);
-
-    if (!jid || !acceptable) {
-      throw new BadRequestException(isWA ?? `Number "${data.number}" is not on WhatsApp`);
+    // tcToken: WhatsApp lo EXIGE en el subscribe para devolver
+    // unavailable/lastSeen en privacy mode @lid. Sin él solo llega
+    // composing/available (nivel conversación). Se captura de mensajes
+    // entrantes y vive en el keystore de Baileys (mismo patrón que
+    // messages-send.js usa al enviar).
+    let tcToken: Buffer | undefined;
+    try {
+      const tc = await waInstance.client.authState.keys.get('tctoken', [jid]);
+      tcToken = tc?.[jid]?.token;
+    } catch (error) {
+      this.logger.warn({ local: 'PresenceSubscribeService.tctoken', jid, error: error?.toString() });
     }
 
     try {
-      // ONLY subscribe — sin sendPresenceUpdate (nada de composing/paused).
-      await waInstance.client.presenceSubscribe(jid);
-      return { ok: true, jid };
+      await waInstance.client.presenceSubscribe(jid, tcToken);
+      return { ok: true, jid, hadTcToken: !!tcToken };
     } catch (error) {
       this.logger.error({ local: 'PresenceSubscribeService.presenceSubscribe', error: error?.toString() });
       throw new BadGatewayException(`Baileys presenceSubscribe failed: ${error?.message ?? error?.toString()}`);
