@@ -52,6 +52,7 @@ import {
   StatusMessage,
   TypeButton,
 } from '@api/dto/sendMessage.dto';
+import { procesarEventosDelFork } from '@api/extensions/eventos/eventos-del-fork';
 import { chatwootImport } from '@api/integrations/chatbot/chatwoot/utils/chatwoot-import-helper';
 import * as s3Service from '@api/integrations/storage/s3/libs/minio.server';
 import { ProviderFiles } from '@api/provider/sessions';
@@ -1881,6 +1882,8 @@ export class BaileysStartupService extends ChannelStartupService {
           if (!this.endSession) {
             const database = this.configService.get<Database>('DATABASE');
             const settings = await this.findSettings();
+
+            await procesarEventosDelFork(this, events); // fork: los eventos que el core no reenvía (ver extensions/eventos)
 
             if (events.call) {
               const call = events.call[0];
