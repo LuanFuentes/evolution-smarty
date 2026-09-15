@@ -36,6 +36,15 @@ export enum Events {
   MESSAGING_HISTORY_SET = 'messaging-history.set',
   REMOVE_INSTANCE = 'remove.instance',
   LOGOUT_INSTANCE = 'logout.instance',
+  // ── Fork evolution-smarty (15-sep-2026): eventos de Baileys 7 que el core no reenvía. Ver extensions/eventos.
+  LID_MAPPING_UPDATE = 'lid-mapping.update',
+  MESSAGE_CAPPING_UPDATE = 'message-capping.update',
+  MESSAGES_REACTION = 'messages.reaction',
+  MESSAGE_RECEIPT_UPDATE = 'message-receipt.update',
+  BLOCKLIST_SET = 'blocklist.set',
+  BLOCKLIST_UPDATE = 'blocklist.update',
+  GROUP_JOIN_REQUEST = 'group.join-request',
+  CHATS_LOCK = 'chats.lock',
 }
 
 export declare namespace wa {

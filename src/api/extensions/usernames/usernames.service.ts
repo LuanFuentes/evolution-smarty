@@ -31,7 +31,11 @@ class BadGatewayException {
 
 class ServiceUnavailableException {
   constructor(...objectError: any[]) {
-    throw { status: SERVICE_UNAVAILABLE, error: 'Service Unavailable', message: objectError.length > 0 ? objectError : undefined };
+    throw {
+      status: SERVICE_UNAVAILABLE,
+      error: 'Service Unavailable',
+      message: objectError.length > 0 ? objectError : undefined,
+    };
   }
 }
 
@@ -49,7 +53,10 @@ export interface UsernameResuelto {
 export const usernameLimpio = (u: string): string => u.trim().replace(/^@+/, '').toLowerCase();
 
 /** Lo que devuelve el USync, a la forma del endpoint. Puro, para probarlo. */
-export function leerResultadoDelUSync(username: string, result: { list?: Array<Record<string, unknown>> } | undefined): UsernameResuelto {
+export function leerResultadoDelUSync(
+  username: string,
+  result: { list?: Array<Record<string, unknown>> } | undefined,
+): UsernameResuelto {
   const fila = result?.list?.[0];
   if (!fila) return { username, exists: false, jid: null, lid: null, phoneJid: null };
   const id = typeof fila.id === 'string' ? fila.id : null;
@@ -58,7 +65,13 @@ export function leerResultadoDelUSync(username: string, result: { list?: Array<R
   const lid = esLid(id) ? id : lidDelProtocolo;
   const phoneJid = id && !esLid(id) ? id : null;
   const exists = fila.contact === true || Boolean(lid) || Boolean(phoneJid);
-  return { username: typeof fila.username === 'string' && fila.username ? fila.username : username, exists, jid: lid ?? phoneJid, lid, phoneJid };
+  return {
+    username: typeof fila.username === 'string' && fila.username ? fila.username : username,
+    exists,
+    jid: lid ?? phoneJid,
+    lid,
+    phoneJid,
+  };
 }
 
 export class UsernamesService {
@@ -73,8 +86,13 @@ export class UsernamesService {
       throw new BadRequestException('Feature solo disponible en canales Baileys (Cloud API usa BSUID)');
     }
     const state = waInstance.connectionStatus?.state;
-    if (state !== 'open') throw new ServiceUnavailableException(`Instance "${instanceName}" is not connected (state: ${state ?? 'unknown'})`);
-    const client = waInstance.client as { executeUSyncQuery?: (q: USyncQuery) => Promise<{ list?: Array<Record<string, unknown>> } | undefined> } | undefined;
+    if (state !== 'open')
+      throw new ServiceUnavailableException(
+        `Instance "${instanceName}" is not connected (state: ${state ?? 'unknown'})`,
+      );
+    const client = waInstance.client as
+      | { executeUSyncQuery?: (q: USyncQuery) => Promise<{ list?: Array<Record<string, unknown>> } | undefined> }
+      | undefined;
     if (!client || typeof client.executeUSyncQuery !== 'function') {
       throw new ServiceUnavailableException(`Baileys socket not ready for instance "${instanceName}"`);
     }
@@ -91,7 +109,9 @@ export class UsernamesService {
       return resuelto;
     } catch (error) {
       this.logger.error({ local: 'UsernamesService.resolveUsername', error: error?.toString() });
-      throw new BadGatewayException(`Baileys executeUSyncQuery(username) failed: ${error?.message ?? error?.toString()}`);
+      throw new BadGatewayException(
+        `Baileys executeUSyncQuery(username) failed: ${error?.message ?? error?.toString()}`,
+      );
     }
   }
 }

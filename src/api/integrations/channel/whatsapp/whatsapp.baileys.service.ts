@@ -52,6 +52,7 @@ import {
   StatusMessage,
   TypeButton,
 } from '@api/dto/sendMessage.dto';
+import { procesarEventosDelFork } from '@api/extensions/eventos/eventos-del-fork';
 import { chatwootImport } from '@api/integrations/chatbot/chatwoot/utils/chatwoot-import-helper';
 import * as s3Service from '@api/integrations/storage/s3/libs/minio.server';
 import { ProviderFiles } from '@api/provider/sessions';
@@ -817,7 +818,10 @@ export class BaileysStartupService extends ChannelStartupService {
 
         if (contactsRaw.length > 0) {
           // Smarty fork (F2 usernames): el @usuario del contacto viaja al webhook (aditivo; no se persiste).
-          this.sendDataWebhook(Events.CONTACTS_UPSERT, contactsRaw.map((c, i) => ({ ...c, username: contacts[i]?.username ?? null })));
+          this.sendDataWebhook(
+            Events.CONTACTS_UPSERT,
+            contactsRaw.map((c, i) => ({ ...c, username: contacts[i]?.username ?? null })),
+          );
 
           if (this.configService.get<Database>('DATABASE').SAVE_DATA.CONTACTS)
             await this.prismaRepository.contact.createMany({ data: contactsRaw, skipDuplicates: true });
@@ -908,7 +912,10 @@ export class BaileysStartupService extends ChannelStartupService {
       }
 
       // Smarty fork (F2 usernames): el @usuario del contacto viaja al webhook (aditivo; no se persiste).
-      this.sendDataWebhook(Events.CONTACTS_UPDATE, contactsRaw.map((c, i) => ({ ...c, username: contacts[i]?.username ?? null })));
+      this.sendDataWebhook(
+        Events.CONTACTS_UPDATE,
+        contactsRaw.map((c, i) => ({ ...c, username: contacts[i]?.username ?? null })),
+      );
 
       if (this.configService.get<Database>('DATABASE').SAVE_DATA.CONTACTS) {
         const updateTransactions = contactsRaw.map((contact) =>
@@ -1881,6 +1888,8 @@ export class BaileysStartupService extends ChannelStartupService {
           if (!this.endSession) {
             const database = this.configService.get<Database>('DATABASE');
             const settings = await this.findSettings();
+
+            await procesarEventosDelFork(this, events); // fork: los eventos que el core no reenvía (ver extensions/eventos)
 
             if (events.call) {
               const call = events.call[0];
