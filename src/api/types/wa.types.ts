@@ -45,6 +45,8 @@ export enum Events {
   BLOCKLIST_UPDATE = 'blocklist.update',
   GROUP_JOIN_REQUEST = 'group.join-request',
   CHATS_LOCK = 'chats.lock',
+  /** Sintetizado por el fork a partir de chats.update: el core manda ese evento sin el campo `archived`. */
+  CHATS_ARCHIVE = 'chats.archive',
 }
 
 export declare namespace wa {

@@ -31,6 +31,7 @@ export const EVENTOS_DEL_FORK = [
   'BLOCKLIST_UPDATE',
   'GROUP_JOIN_REQUEST',
   'CHATS_LOCK',
+  'CHATS_ARCHIVE',
 ] as const;
 
 /** Reenvía al webhook los eventos que el core no manda. Nunca tira: un fallo acá no puede frenar el lote del core. */
@@ -58,4 +59,11 @@ export async function procesarEventosDelFork(instancia: InstanciaQueEmite, event
   await mandar(Events.BLOCKLIST_UPDATE, events['blocklist.update']);
   await mandar(Events.GROUP_JOIN_REQUEST, events['group.join-request']);
   await mandar(Events.CHATS_LOCK, events['chats.lock']);
+
+  // Archivar / desarchivar desde el celular llega como chats.update { id, archived }; el core reenvía ese evento
+  // sólo con el remoteJid, así que acá sale con su nombre propio y el campo que importa.
+  const archivados = (events['chats.update'] ?? [])
+    .filter((c) => typeof c?.archived === 'boolean' && typeof c?.id === 'string')
+    .map((c) => ({ id: c.id as string, archived: c.archived as boolean }));
+  if (archivados.length > 0) await mandar(Events.CHATS_ARCHIVE, archivados);
 }

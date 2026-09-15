@@ -76,6 +76,16 @@ test('cada evento nuevo viaja con su nombre y su payload tal cual', async () => 
   assert.equal(i.mandados.length, 7);
 });
 
+test('archivar desde el celular sale como CHATS_ARCHIVE sólo con los chats que traen el campo', async () => {
+  const i = instanciaFalsa();
+  await procesarEventosDelFork(i, {
+    'chats.update': [{ id: 'a@s.whatsapp.net', archived: true }, { id: 'b@lid', unreadCount: 0 }, { id: 'c@g.us', archived: false }],
+  } as any);
+  assert.equal(i.mandados.length, 1);
+  assert.equal(i.mandados[0].event, Events.CHATS_ARCHIVE);
+  assert.deepEqual(i.mandados[0].data, [{ id: 'a@s.whatsapp.net', archived: true }, { id: 'c@g.us', archived: false }]);
+});
+
 test('un webhook que falla no frena el lote ni tira', async () => {
   const avisos: unknown[] = [];
   const i = {
