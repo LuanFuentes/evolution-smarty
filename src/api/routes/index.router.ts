@@ -233,6 +233,7 @@ router
   //   - LabelExtensionsRouter:    GET  /label/getChatLabels
   //   - GroupExtensionsRouter:    POST /group/{joinRequests,updateJoinRequests}
   //   - (ChatExtensionsRouter)    GET  /chat/{fetchNewChatMessageCap,fetchBlocklist} · POST /chat/lidMapping
+  //   - capacidades:              POST /message/sendAlbum · POST /chat/{quickReply,removeQuickReply} · POST /business/product{Create,Update,Delete}
   .use('/chat', new ChatExtensionsRouter(...guards).router)
   .use('/message', new MessageExtensionsRouter(...guards).router)
   .use('/business', new BusinessExtensionsRouter(...guards).router)

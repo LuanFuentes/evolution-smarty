@@ -1,4 +1,5 @@
 import { RouterBroker } from '@api/abstract/abstract.router';
+import { CapacidadesMessageRouter } from '@api/extensions/capacidades/capacidades.router';
 import { EditMessageRouter } from '@api/extensions/edit/edit.router';
 import { pinController } from '@api/extensions/extensions.module';
 import { HttpStatus } from '@api/routes/index.router';
@@ -22,6 +23,7 @@ export class MessageExtensionsRouter extends RouterBroker {
     });
 
     this.router.use(new EditMessageRouter(...guards).router);
+    this.router.use(new CapacidadesMessageRouter(...guards).router); // POST /message/sendAlbum
   }
 
   public readonly router: Router = Router();

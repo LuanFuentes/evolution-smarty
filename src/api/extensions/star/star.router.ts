@@ -1,4 +1,5 @@
 import { RouterBroker } from '@api/abstract/abstract.router';
+import { CapacidadesChatRouter } from '@api/extensions/capacidades/capacidades.router';
 import { EventosChatRouter } from '@api/extensions/eventos/eventos-chat.router';
 import { starController } from '@api/extensions/extensions.module';
 import { PresenceSubscribeRouter } from '@api/extensions/presence-subscribe/presence-subscribe.router';
@@ -30,6 +31,7 @@ export class ChatExtensionsRouter extends RouterBroker {
     this.router.use(new PrivacyTokensRouter(...guards).router);
     this.router.use(new UsernamesRouter(...guards).router); // POST /chat/resolveUsername (F2 usernames)
     this.router.use(new EventosChatRouter(...guards).router); // GET fetchNewChatMessageCap · GET fetchBlocklist · POST lidMapping
+    this.router.use(new CapacidadesChatRouter(...guards).router); // POST quickReply · POST removeQuickReply
   }
 
   public readonly router: Router = Router();

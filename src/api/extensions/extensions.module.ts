@@ -3,6 +3,8 @@ import { Logger } from '@config/logger.config';
 
 import { BusinessExtController } from './business/business.controller';
 import { BusinessService } from './business/business.service';
+import { CapacidadesController } from './capacidades/capacidades.controller';
+import { CapacidadesService } from './capacidades/capacidades.service';
 import { EditController } from './edit/edit.controller';
 import { EditService } from './edit/edit.service';
 import { EventosController } from './eventos/eventos.controller';
@@ -53,5 +55,8 @@ export const usernamesController = new UsernamesController(usernamesService);
 
 const eventosService = new EventosService(waMonitor);
 export const eventosController = new EventosController(eventosService);
+
+const capacidadesService = new CapacidadesService(waMonitor);
+export const capacidadesController = new CapacidadesController(capacidadesService);
 
 logger.info('Extensions Module - ON');

@@ -1,4 +1,5 @@
 import { RouterBroker } from '@api/abstract/abstract.router';
+import { CapacidadesBusinessRouter } from '@api/extensions/capacidades/capacidades.router';
 import { businessExtController } from '@api/extensions/extensions.module';
 import { HttpStatus } from '@api/routes/index.router';
 import { RequestHandler, Router } from 'express';
@@ -19,6 +20,8 @@ export class BusinessExtensionsRouter extends RouterBroker {
 
       return res.status(HttpStatus.OK).json(response);
     });
+
+    this.router.use(new CapacidadesBusinessRouter(...guards).router); // POST productCreate · productUpdate · productDelete
   }
 
   public readonly router: Router = Router();
