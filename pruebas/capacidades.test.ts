@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { comoMedio, esVideo } from '@api/extensions/capacidades/capacidades.service';
+import { comoMedio, esVideo } from '@api/extensions/capacidades/capacidades.puro';
 
 test('un medio por URL va tal cual; en base64 se vuelve Buffer (con o sin el prefijo data:)', () => {
   assert.deepEqual(comoMedio({ url: 'https://x/y.jpg' }), { url: 'https://x/y.jpg' });

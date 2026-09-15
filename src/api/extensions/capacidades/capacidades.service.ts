@@ -18,10 +18,9 @@ import { Integration } from '@api/types/wa.types';
 import { Logger } from '@config/logger.config';
 import { BadRequestException, NotFoundException } from '@exceptions';
 import { createJid } from '@utils/createJid';
-import type { AnyMessageContent, WAMediaUpload } from 'baileys';
+import type { AnyMessageContent } from 'baileys';
 
 import {
-  MedioDto,
   ProductCreateDto,
   ProductDeleteDto,
   ProductUpdateDto,
@@ -29,6 +28,7 @@ import {
   RemoveQuickReplyDto,
   SendAlbumDto,
 } from './capacidades.dto';
+import { comoMedio, esperar, esVideo } from './capacidades.puro';
 
 const BAD_GATEWAY = 502;
 const SERVICE_UNAVAILABLE = 503;
@@ -48,20 +48,6 @@ class ServiceUnavailableException {
     };
   }
 }
-
-/** Un medio del DTO a lo que Baileys sube: URL tal cual o el base64 como Buffer. Puro. */
-export function comoMedio(m: MedioDto): WAMediaUpload {
-  if (m.base64) return Buffer.from(m.base64.replace(/^data:[^;]+;base64,/, ''), 'base64');
-  return { url: m.url as string };
-}
-
-/** Video si el mimetype o la extensión lo dicen; si no, imagen. Puro. */
-export function esVideo(m: MedioDto): boolean {
-  if (m.mimetype) return m.mimetype.startsWith('video/');
-  return /\.(mp4|mov|webm|3gp|mkv)(\?|$)/i.test(m.url ?? '');
-}
-
-export const esperar = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 export class CapacidadesService {
   private readonly logger = new Logger('CapacidadesService');
