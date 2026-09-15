@@ -17,6 +17,8 @@ import { ResyncAppStateController } from './resync-app-state/resync-app-state.co
 import { ResyncAppStateService } from './resync-app-state/resync-app-state.service';
 import { StarController } from './star/star.controller';
 import { StarService } from './star/star.service';
+import { UsernamesController } from './usernames/usernames.controller';
+import { UsernamesService } from './usernames/usernames.service';
 
 const logger = new Logger('EXTENSIONS MODULE');
 
@@ -43,5 +45,8 @@ export const presenceSubscribeController = new PresenceSubscribeController(prese
 
 const privacyTokensService = new PrivacyTokensService(waMonitor);
 export const privacyTokensController = new PrivacyTokensController(privacyTokensService);
+
+const usernamesService = new UsernamesService(waMonitor);
+export const usernamesController = new UsernamesController(usernamesService);
 
 logger.info('Extensions Module - ON');

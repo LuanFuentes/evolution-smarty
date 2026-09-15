@@ -3,6 +3,7 @@ import { starController } from '@api/extensions/extensions.module';
 import { PresenceSubscribeRouter } from '@api/extensions/presence-subscribe/presence-subscribe.router';
 import { PrivacyTokensRouter } from '@api/extensions/privacy-tokens/privacy-tokens.router';
 import { ResyncAppStateRouter } from '@api/extensions/resync-app-state/resync-app-state.router';
+import { UsernamesRouter } from '@api/extensions/usernames/usernames.router';
 import { HttpStatus } from '@api/routes/index.router';
 import { RequestHandler, Router } from 'express';
 
@@ -26,6 +27,7 @@ export class ChatExtensionsRouter extends RouterBroker {
     this.router.use(new ResyncAppStateRouter(...guards).router);
     this.router.use(new PresenceSubscribeRouter(...guards).router);
     this.router.use(new PrivacyTokensRouter(...guards).router);
+    this.router.use(new UsernamesRouter(...guards).router); // POST /chat/resolveUsername (F2 usernames)
   }
 
   public readonly router: Router = Router();
