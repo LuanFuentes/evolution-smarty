@@ -818,7 +818,10 @@ export class BaileysStartupService extends ChannelStartupService {
 
         if (contactsRaw.length > 0) {
           // Smarty fork (F2 usernames): el @usuario del contacto viaja al webhook (aditivo; no se persiste).
-          this.sendDataWebhook(Events.CONTACTS_UPSERT, contactsRaw.map((c, i) => ({ ...c, username: contacts[i]?.username ?? null })));
+          this.sendDataWebhook(
+            Events.CONTACTS_UPSERT,
+            contactsRaw.map((c, i) => ({ ...c, username: contacts[i]?.username ?? null })),
+          );
 
           if (this.configService.get<Database>('DATABASE').SAVE_DATA.CONTACTS)
             await this.prismaRepository.contact.createMany({ data: contactsRaw, skipDuplicates: true });
@@ -909,7 +912,10 @@ export class BaileysStartupService extends ChannelStartupService {
       }
 
       // Smarty fork (F2 usernames): el @usuario del contacto viaja al webhook (aditivo; no se persiste).
-      this.sendDataWebhook(Events.CONTACTS_UPDATE, contactsRaw.map((c, i) => ({ ...c, username: contacts[i]?.username ?? null })));
+      this.sendDataWebhook(
+        Events.CONTACTS_UPDATE,
+        contactsRaw.map((c, i) => ({ ...c, username: contacts[i]?.username ?? null })),
+      );
 
       if (this.configService.get<Database>('DATABASE').SAVE_DATA.CONTACTS) {
         const updateTransactions = contactsRaw.map((contact) =>
