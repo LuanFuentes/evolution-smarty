@@ -14,6 +14,7 @@ import mimeTypes from 'mime-types';
 import path from 'path';
 
 import { BusinessExtensionsRouter } from '../extensions/business/business.router';
+import { GroupExtensionsRouter } from '../extensions/eventos/eventos-group.router';
 import { LabelExtensionsRouter } from '../extensions/label/chat-labels.router';
 import { MessageExtensionsRouter } from '../extensions/pin/pin.router';
 import { ChatExtensionsRouter } from '../extensions/star/star.router';
@@ -226,14 +227,17 @@ router
   // son el ÚNICO toque al core router. Las extensiones viven en
   // src/api/extensions/ — git pull upstream/main resuelve los conflicts
   // automático (mismo prefix que el core, distinto router class).
-  //   - ChatExtensionsRouter:     POST /chat/{starMessage,resyncAppState,presenceSubscribe,debugPrivacyTokens}
+  //   - ChatExtensionsRouter:     POST /chat/{starMessage,resyncAppState,presenceSubscribe,debugPrivacyTokens,resolveUsername}
   //   - MessageExtensionsRouter:  POST /message/pin, POST /message/editMessage
   //   - BusinessExtensionsRouter: POST /business/getOrderDetails
   //   - LabelExtensionsRouter:    GET  /label/getChatLabels
+  //   - GroupExtensionsRouter:    POST /group/{joinRequests,updateJoinRequests}
+  //   - (ChatExtensionsRouter)    GET  /chat/{fetchNewChatMessageCap,fetchBlocklist} · POST /chat/lidMapping
   .use('/chat', new ChatExtensionsRouter(...guards).router)
   .use('/message', new MessageExtensionsRouter(...guards).router)
   .use('/business', new BusinessExtensionsRouter(...guards).router)
   .use('/label', new LabelExtensionsRouter(...guards).router)
+  .use('/group', new GroupExtensionsRouter(...guards).router)
   .use('/business', new BusinessRouter(...guards).router)
   .use('/group', new GroupRouter(...guards).router)
   .use('/template', new TemplateRouter(configService, ...guards).router)

@@ -1,3 +1,4 @@
+import { EVENTOS_DEL_FORK } from '@api/extensions/eventos/eventos-del-fork';
 import { EventDto } from '@api/integrations/event/event.dto';
 import { PrismaRepository } from '@api/repository/repository.service';
 import { WAMonitoringService } from '@api/services/monitor.service';
@@ -167,5 +168,6 @@ export class EventController {
     'INSTANCE_CREATE',
     'INSTANCE_DELETE',
     'STATUS_INSTANCE',
+    ...EVENTOS_DEL_FORK, // fork: LID_MAPPING_UPDATE, MESSAGE_CAPPING_UPDATE, MESSAGES_REACTION, MESSAGE_RECEIPT_UPDATE, BLOCKLIST_*, GROUP_JOIN_REQUEST, CHATS_LOCK
   ];
 }
