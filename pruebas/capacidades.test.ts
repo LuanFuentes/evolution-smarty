@@ -97,3 +97,90 @@ test('el IQ del pedido es el de Baileys: fb:thrift_iq, order op=get con el id, y
   const token = (order.content as NodoBinario[]).find((h) => h.tag === 'token');
   assert.equal(Buffer.from(token?.content as Uint8Array).toString(), 'dG9rZW4=');
 });
+
+// ─── El catálogo por QR: un timeout no es un catálogo vacío (18-sep) ───
+import {
+  elCatalogoDelNodo,
+  elIqDeBorrarProductos,
+  elIqDelCatalogo,
+  elJidSinDispositivo,
+  losBorradosDelNodo,
+} from '@api/extensions/business/catalogo.puro';
+
+const b = (s: string) => Buffer.from(s);
+
+test('elIqDelCatalogo arma el mismo IQ que Baileys getCatalog (w:biz:catalog · product_catalog · limit/width/height, after si hay cursor)', () => {
+  const iq = elIqDelCatalogo('51999@s.whatsapp.net', 100);
+  assert.equal(iq.attrs?.xmlns, 'w:biz:catalog');
+  assert.equal(iq.attrs?.type, 'get');
+  const pc = (iq.content as NodoBinario[])[0];
+  assert.equal(pc.tag, 'product_catalog');
+  assert.deepEqual(pc.attrs, { jid: '51999@s.whatsapp.net', allow_shop_source: 'true' });
+  assert.deepEqual((pc.content as NodoBinario[]).map((n) => n.tag), ['limit', 'width', 'height']);
+  assert.equal((pc.content as NodoBinario[])[0].content?.toString(), '100');
+  const conCursor = elIqDelCatalogo('x@s.whatsapp.net', 10, 'abc');
+  const tags = ((conCursor.content as NodoBinario[])[0].content as NodoBinario[]).map((n) => n.tag);
+  assert.deepEqual(tags, ['limit', 'width', 'height', 'after']);
+});
+
+test('elCatalogoDelNodo lee cada producto entero (id, retailer_id, precio, imagen original, oculto, estado) y el cursor', () => {
+  const nodo: NodoBinario = {
+    tag: 'iq',
+    attrs: { type: 'result' },
+    content: [
+      {
+        tag: 'product_catalog',
+        attrs: {},
+        content: [
+          {
+            tag: 'product',
+            attrs: { is_hidden: 'false' },
+            content: [
+              { tag: 'id', attrs: {}, content: b('7000001') },
+              { tag: 'retailer_id', attrs: {}, content: b('WAF-OREO') },
+              { tag: 'name', attrs: {}, content: b('Waffle Oreo Rock') },
+              { tag: 'description', attrs: {}, content: b('con helado') },
+              { tag: 'price', attrs: {}, content: b('20000') },
+              { tag: 'currency', attrs: {}, content: b('PEN') },
+              { tag: 'media', attrs: {}, content: [{ tag: 'image', attrs: {}, content: [
+                { tag: 'request_image_url', attrs: {}, content: b('https://r/chica.jpg') },
+                { tag: 'original_image_url', attrs: {}, content: b('https://r/grande.jpg') },
+              ] }] },
+              { tag: 'status_info', attrs: {}, content: [{ tag: 'status', attrs: {}, content: b('APPROVED') }] },
+            ],
+          },
+          { tag: 'product', attrs: { is_hidden: 'true' }, content: [{ tag: 'id', attrs: {}, content: b('7000002') }, { tag: 'name', attrs: {}, content: b('Oculto') }] },
+          { tag: 'paging', attrs: {}, content: [{ tag: 'after', attrs: {}, content: b('cursor-2') }] },
+        ],
+      },
+    ],
+  };
+  const leido = elCatalogoDelNodo(nodo);
+  assert.equal(leido.products.length, 2);
+  assert.deepEqual(leido.products[0], {
+    id: '7000001', retailerId: 'WAF-OREO', name: 'Waffle Oreo Rock', description: 'con helado', price: 20000, currency: 'PEN',
+    url: null, imageUrl: 'https://r/grande.jpg', isHidden: false, reviewStatus: 'APPROVED',
+  });
+  assert.equal(leido.products[1].isHidden, true);
+  assert.equal(leido.products[1].retailerId, null);
+  assert.equal(leido.nextPageCursor, 'cursor-2');
+});
+
+test('un nodo sin product_catalog (respuesta rara) da cero productos y sin cursor; el timeout NO llega acá: es 504 en el servicio', () => {
+  assert.deepEqual(elCatalogoDelNodo({ tag: 'iq', attrs: {}, content: [] }), { products: [], nextPageCursor: null });
+});
+
+test('elJidSinDispositivo saca el :NN del jid propio', () => {
+  assert.equal(elJidSinDispositivo('51999888777:12@s.whatsapp.net'), '51999888777@s.whatsapp.net');
+  assert.equal(elJidSinDispositivo('51999888777@s.whatsapp.net'), '51999888777@s.whatsapp.net');
+});
+
+test('elIqDeBorrarProductos arma el product_catalog_delete de Baileys y losBorradosDelNodo lee deleted_count', () => {
+  const iq = elIqDeBorrarProductos(['1', '2']);
+  assert.equal(iq.attrs?.type, 'set');
+  const del = (iq.content as NodoBinario[])[0];
+  assert.equal(del.tag, 'product_catalog_delete');
+  assert.equal((del.content as NodoBinario[]).length, 2);
+  assert.equal(losBorradosDelNodo({ tag: 'iq', attrs: {}, content: [{ tag: 'product_catalog_delete', attrs: { deleted_count: '2' } }] }), 2);
+  assert.equal(losBorradosDelNodo({ tag: 'iq', attrs: {}, content: [] }), 0);
+});

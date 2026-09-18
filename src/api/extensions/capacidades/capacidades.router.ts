@@ -6,7 +6,6 @@ import { JSONSchema7 } from 'json-schema';
 
 import {
   ProductCreateDto,
-  ProductDeleteDto,
   ProductUpdateDto,
   QuickReplyDto,
   RemoveQuickReplyDto,
@@ -15,7 +14,6 @@ import {
 } from './capacidades.dto';
 import {
   productCreateSchema,
-  productDeleteSchema,
   productUpdateSchema,
   quickReplySchema,
   removeQuickReplySchema,
@@ -81,9 +79,7 @@ export class CapacidadesBusinessRouter extends RouterBroker {
     post(this, 'productUpdate', guards, productUpdateSchema, ProductUpdateDto, (i, d) =>
       capacidadesController.productUpdate(i, d),
     );
-    post(this, 'productDelete', guards, productDeleteSchema, ProductDeleteDto, (i, d) =>
-      capacidadesController.productDelete(i, d),
-    );
+    // productDelete vive en BusinessExtensionsRouter (18-sep): el de Baileys respondía «deleted: 0» ante un timeout.
   }
 
   public readonly router: Router = Router();
