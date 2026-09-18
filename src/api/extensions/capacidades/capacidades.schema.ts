@@ -25,6 +25,34 @@ export const sendAlbumSchema: JSONSchema7 = {
   anyOf: [{ required: ['number'] }, { required: ['jid'] }],
 };
 
+export const sendProductSchema: JSONSchema7 = {
+  $id: v4(),
+  type: 'object',
+  properties: {
+    number: { type: 'string', minLength: 5 },
+    jid: { type: 'string', pattern: '@(lid|s\\.whatsapp\\.net|c\\.us|g\\.us)$' },
+    product: {
+      type: 'object',
+      properties: {
+        productId: { type: 'string', minLength: 1, maxLength: 100 },
+        title: { type: 'string', minLength: 1, maxLength: 200 },
+        description: { type: 'string', maxLength: 5000 },
+        currencyCode: { type: 'string', minLength: 3, maxLength: 3 },
+        price: { type: 'number', minimum: 0 },
+        retailerId: { type: 'string', maxLength: 100 },
+        url: { type: 'string', pattern: '^https?://' },
+        image: medio,
+      },
+      required: ['productId', 'title', 'currencyCode', 'price', 'image'],
+    },
+    businessOwnerJid: { type: 'string', pattern: '@(s\\.whatsapp\\.net|c\\.us)$' },
+    body: { type: 'string', maxLength: 1024 },
+    footer: { type: 'string', maxLength: 60 },
+  },
+  required: ['product'],
+  anyOf: [{ required: ['number'] }, { required: ['jid'] }],
+};
+
 export const quickReplySchema: JSONSchema7 = {
   $id: v4(),
   type: 'object',

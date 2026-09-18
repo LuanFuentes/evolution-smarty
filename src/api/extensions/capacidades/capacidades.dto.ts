@@ -15,6 +15,32 @@ export class SendAlbumDto {
   delay?: number;
 }
 
+/** El producto tal como va en la ficha nativa (Baileys `WASendableProduct`, sin la foto subida). */
+export class ProductoEnviableDto {
+  /** El id del producto en el catálogo de WhatsApp (el que devuelve getCatalog / productCreate). */
+  productId: string;
+  title: string;
+  description?: string;
+  /** ISO 4217: PEN, USD… */
+  currencyCode: string;
+  /** En unidades de la moneda (17.5); WhatsApp lo lleva en milésimas. */
+  price: number;
+  retailerId?: string;
+  url?: string;
+  image: MedioDto;
+}
+
+/** POST /message/sendProduct/{instance} · la ficha nativa de UN producto del catálogo (foto, precio y «Ver»). */
+export class SendProductDto {
+  number?: string;
+  jid?: string;
+  product: ProductoEnviableDto;
+  /** El JID del negocio dueño del catálogo; por defecto, la propia línea. */
+  businessOwnerJid?: string;
+  body?: string;
+  footer?: string;
+}
+
 /** POST /chat/quickReply/{instance} · crea o edita una respuesta rápida del WhatsApp Business del teléfono. */
 export class QuickReplyDto {
   /** El atajo, sin la barra: «gracias» aparece como /gracias. */

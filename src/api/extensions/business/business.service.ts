@@ -5,6 +5,7 @@ import { Logger } from '@config/logger.config';
 import { BadRequestException, NotFoundException } from '@exceptions';
 
 import { OrderDetailsDto } from './business.dto';
+import { elIqDelPedido, elPedidoDelNodo } from './pedido.puro';
 
 const BAD_GATEWAY = 502;
 const SERVICE_UNAVAILABLE = 503;
@@ -52,16 +53,16 @@ export class BusinessService {
       );
     }
 
-    if (!waInstance.client || typeof waInstance.client.getOrderDetails !== 'function') {
+    if (!waInstance.client || typeof waInstance.client.query !== 'function') {
       throw new ServiceUnavailableException(`Baileys socket not ready for instance "${instanceName}"`);
     }
 
     try {
-      const result = await waInstance.client.getOrderDetails(data.orderId, data.tokenBase64);
+      // El mismo IQ de Baileys `getOrderDetails`, leído entero: su parser se come `retailer_id` (ver pedido.puro.ts).
+      const nodo = await waInstance.client.query(elIqDelPedido(data.orderId, data.tokenBase64));
+      const pedido = elPedidoDelNodo(nodo);
 
-      return {
-        products: result?.products ?? [],
-      };
+      return { price: pedido.price, products: pedido.products };
     } catch (error) {
       this.logger.error({ local: 'BusinessService.getOrderDetails', error: error?.toString() });
       throw new BadGatewayException(`Baileys getOrderDetails failed: ${error?.message ?? error?.toString()}`);
