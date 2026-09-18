@@ -18,3 +18,21 @@ export const orderDetailsSchema: JSONSchema7 = {
   },
   required: ['orderId', 'tokenBase64'],
 };
+
+export const catalogoSchema: JSONSchema7 = {
+  $id: v4(),
+  type: 'object',
+  properties: {
+    number: { type: 'string' },
+    limit: { type: 'integer', minimum: 1, maximum: 100 },
+  },
+};
+
+export const productosABorrarSchema: JSONSchema7 = {
+  $id: v4(),
+  type: 'object',
+  properties: {
+    productIds: { type: 'array', minItems: 1, items: { type: 'string', minLength: 1 } },
+  },
+  required: ['productIds'],
+};
