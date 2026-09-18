@@ -11,6 +11,7 @@ import {
   QuickReplyDto,
   RemoveQuickReplyDto,
   SendAlbumDto,
+  SendProductDto,
 } from './capacidades.dto';
 import {
   productCreateSchema,
@@ -19,6 +20,7 @@ import {
   quickReplySchema,
   removeQuickReplySchema,
   sendAlbumSchema,
+  sendProductSchema,
 } from './capacidades.schema';
 
 type Ejecutar<T> = (instance: { instanceName: string }, data: T) => Promise<unknown>;
@@ -48,6 +50,9 @@ export class CapacidadesMessageRouter extends RouterBroker {
   constructor(...guards: RequestHandler[]) {
     super();
     post(this, 'sendAlbum', guards, sendAlbumSchema, SendAlbumDto, (i, d) => capacidadesController.sendAlbum(i, d));
+    post(this, 'sendProduct', guards, sendProductSchema, SendProductDto, (i, d) =>
+      capacidadesController.sendProduct(i, d),
+    );
   }
 
   public readonly router: Router = Router();

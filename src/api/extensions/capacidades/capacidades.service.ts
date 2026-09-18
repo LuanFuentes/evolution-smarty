@@ -2,6 +2,7 @@
  * Capacidades de Baileys 7 que Evolution no expone (15-sep-2026):
  *
  *   POST /message/sendAlbum/{instance}       → varias fotos/videos en UNA burbuja (`album` + `albumParentKey`)
+ *   POST /message/sendProduct/{instance}     → la ficha nativa de un producto del catálogo (`productMessage`)
  *   POST /chat/quickReply/{instance}         → crear/editar una respuesta rápida del WhatsApp Business del teléfono
  *   POST /chat/removeQuickReply/{instance}   → borrarla
  *   POST /business/productCreate/{instance}  → publicar un producto en el catálogo de la línea
@@ -27,8 +28,9 @@ import {
   QuickReplyDto,
   RemoveQuickReplyDto,
   SendAlbumDto,
+  SendProductDto,
 } from './capacidades.dto';
-import { comoMedio, esperar, esVideo } from './capacidades.puro';
+import { comoMedio, comoProductoEnviable, elDuenoDelCatalogo, esperar, esVideo } from './capacidades.puro';
 
 const BAD_GATEWAY = 502;
 const SERVICE_UNAVAILABLE = 503;
@@ -103,6 +105,21 @@ export class CapacidadesService {
         if (i < data.items.length - 1 && data.delay) await esperar(data.delay);
       }
       return { key: album.key, items: hijos, fotos, videos };
+    });
+  }
+
+  /** La ficha nativa de un producto: WhatsApp la pinta con foto, precio y «Ver», y el cliente la agrega al carrito. */
+  public sendProduct({ instanceName }: InstanceDto, data: SendProductDto) {
+    const jid = data.jid && data.jid.includes('@') ? data.jid : createJid(data.number as string);
+    return this.conElSocket(instanceName, 'sendMessage', async (client) => {
+      const businessOwnerJid = elDuenoDelCatalogo(data.businessOwnerJid, client.user?.id);
+      const enviado = await client.sendMessage(jid, {
+        product: comoProductoEnviable(data.product),
+        businessOwnerJid,
+        body: data.body,
+        footer: data.footer,
+      } as AnyMessageContent);
+      return { key: enviado?.key ?? null, productId: data.product.productId, businessOwnerJid };
     });
   }
 

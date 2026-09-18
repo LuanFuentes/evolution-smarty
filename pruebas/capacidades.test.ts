@@ -2,7 +2,13 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { comoMedio, esVideo } from '@api/extensions/capacidades/capacidades.puro';
+import { elIqDelPedido, elPedidoDelNodo, NodoBinario } from '@api/extensions/business/pedido.puro';
+import {
+  comoMedio,
+  comoProductoEnviable,
+  elDuenoDelCatalogo,
+  esVideo,
+} from '@api/extensions/capacidades/capacidades.puro';
 
 test('un medio por URL va tal cual; en base64 se vuelve Buffer (con o sin el prefijo data:)', () => {
   assert.deepEqual(comoMedio({ url: 'https://x/y.jpg' }), { url: 'https://x/y.jpg' });
@@ -18,4 +24,76 @@ test('video por mimetype o por extensión; si no, imagen', () => {
   assert.equal(esVideo({ url: 'https://x/foto.jpg' }), false);
   assert.equal(esVideo({ url: 'https://x/foto.jpg', mimetype: 'video/mp4' }), true);
   assert.equal(esVideo({ base64: 'aGVsbG8=' }), false);
+});
+
+test('el producto enviable lleva el precio en milésimas y la foto como medio', () => {
+  const p = comoProductoEnviable({
+    productId: '123',
+    title: 'Frappé de fresa',
+    currencyCode: 'PEN',
+    price: 17.5,
+    retailerId: 'prod-uuid',
+    image: { url: 'https://x/fresa.jpg' },
+  });
+  assert.equal(p.priceAmount1000, 17500);
+  assert.equal(p.description, '');
+  assert.equal(p.productImageCount, 1);
+  assert.deepEqual(p.productImage, { url: 'https://x/fresa.jpg' });
+  assert.equal(p.retailerId, 'prod-uuid');
+});
+
+test('el dueño del catálogo: el pedido o la propia línea, sin el sufijo del dispositivo', () => {
+  assert.equal(elDuenoDelCatalogo(undefined, '51999888777:12@s.whatsapp.net'), '51999888777@s.whatsapp.net');
+  assert.equal(elDuenoDelCatalogo('51999000111@c.us', '51999888777:12@s.whatsapp.net'), '51999000111@s.whatsapp.net');
+  assert.throws(() => elDuenoDelCatalogo(undefined, undefined));
+});
+
+const nodo = (tag: string, content?: NodoBinario['content'], attrs = {}): NodoBinario => ({ tag, attrs, content });
+const cifra = (tag: string, v: string) => nodo(tag, Buffer.from(v));
+
+test('el pedido del nodo entero: cada producto trae retailer_id si llegó y las etiquetas que vinieron', () => {
+  const respuesta = nodo('iq', [
+    nodo('order', [
+      nodo('product', [
+        cifra('id', '777'),
+        cifra('name', 'Waffle'),
+        nodo('image', [cifra('url', 'https://x/w.jpg')]),
+        cifra('price', '20000'),
+        cifra('currency', 'PEN'),
+        cifra('quantity', '2'),
+        cifra('retailer_id', 'uuid-w'),
+      ]),
+      nodo('product', [cifra('id', '778'), cifra('name', 'Té'), cifra('price', '14000'), cifra('quantity', '1')]),
+      nodo('price', [cifra('total', '54000'), cifra('currency', 'PEN')]),
+    ]),
+  ]);
+  const pedido = elPedidoDelNodo(respuesta);
+  assert.deepEqual(pedido.price, { total: 54000, currency: 'PEN' });
+  assert.equal(pedido.products.length, 2);
+  assert.deepEqual(pedido.products[0], {
+    id: '777',
+    retailerId: 'uuid-w',
+    name: 'Waffle',
+    imageUrl: 'https://x/w.jpg',
+    price: 20000,
+    currency: 'PEN',
+    quantity: 2,
+    campos: ['id', 'name', 'image', 'price', 'currency', 'quantity', 'retailer_id'],
+  });
+  assert.equal(pedido.products[1].retailerId, null);
+  assert.equal(pedido.products[1].imageUrl, null);
+  assert.equal(pedido.products[1].currency, null);
+});
+
+test('sin nodo order no hay productos ni total', () => {
+  assert.deepEqual(elPedidoDelNodo(nodo('iq', [])), { price: { total: 0, currency: null }, products: [] });
+});
+
+test('el IQ del pedido es el de Baileys: fb:thrift_iq, order op=get con el id, y el token', () => {
+  const iq = elIqDelPedido('ORD1', 'dG9rZW4=');
+  assert.equal(iq.attrs?.xmlns, 'fb:thrift_iq');
+  const order = (iq.content as NodoBinario[])[0];
+  assert.deepEqual(order.attrs, { op: 'get', id: 'ORD1' });
+  const token = (order.content as NodoBinario[]).find((h) => h.tag === 'token');
+  assert.equal(Buffer.from(token?.content as Uint8Array).toString(), 'dG9rZW4=');
 });

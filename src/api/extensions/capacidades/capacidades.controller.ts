@@ -7,6 +7,7 @@ import {
   QuickReplyDto,
   RemoveQuickReplyDto,
   SendAlbumDto,
+  SendProductDto,
 } from './capacidades.dto';
 import { CapacidadesService } from './capacidades.service';
 
@@ -15,6 +16,10 @@ export class CapacidadesController {
 
   public sendAlbum(instance: InstanceDto, data: SendAlbumDto) {
     return this.capacidadesService.sendAlbum(instance, data);
+  }
+
+  public sendProduct(instance: InstanceDto, data: SendProductDto) {
+    return this.capacidadesService.sendProduct(instance, data);
   }
 
   public quickReply(instance: InstanceDto, data: QuickReplyDto) {
