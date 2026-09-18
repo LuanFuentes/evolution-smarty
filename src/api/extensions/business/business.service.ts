@@ -3,12 +3,17 @@ import { WAMonitoringService } from '@api/services/monitor.service';
 import { Integration } from '@api/types/wa.types';
 import { Logger } from '@config/logger.config';
 import { BadRequestException, NotFoundException } from '@exceptions';
-
 import { createJid } from '@utils/createJid';
 
 import { CatalogoDto, OrderDetailsDto, ProductosABorrarDto } from './business.dto';
 import type { ProductoDelCatalogo } from './catalogo.puro';
-import { elCatalogoDelNodo, elIqDeBorrarProductos, elIqDelCatalogo, elJidSinDispositivo, losBorradosDelNodo } from './catalogo.puro';
+import {
+  elCatalogoDelNodo,
+  elIqDeBorrarProductos,
+  elIqDelCatalogo,
+  elJidSinDispositivo,
+  losBorradosDelNodo,
+} from './catalogo.puro';
 import { elIqDelPedido, elPedidoDelNodo } from './pedido.puro';
 
 const BAD_GATEWAY = 502;

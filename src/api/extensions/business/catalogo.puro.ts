@@ -96,7 +96,11 @@ export function elIqDeBorrarProductos(productIds: string[]): NodoBinario {
       {
         tag: 'product_catalog_delete',
         attrs: { v: '1' },
-        content: productIds.map((id) => ({ tag: 'product', attrs: {}, content: [{ tag: 'id', attrs: {}, content: Buffer.from(id) }] })),
+        content: productIds.map((id) => ({
+          tag: 'product',
+          attrs: {},
+          content: [{ tag: 'id', attrs: {}, content: Buffer.from(id) }],
+        })),
       },
     ],
   };
