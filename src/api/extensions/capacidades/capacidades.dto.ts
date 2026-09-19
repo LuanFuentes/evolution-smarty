@@ -42,6 +42,24 @@ export class SendProductDto {
 }
 
 /** POST /chat/quickReply/{instance} · crea o edita una respuesta rápida del WhatsApp Business del teléfono. */
+/** Un día del horario del perfil de WhatsApp Business (Baileys `updateBussinesProfile`). */
+export class DiaDelHorarioDto {
+  day: 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday';
+  mode: 'open_24h' | 'appointment_only' | 'specific_hours';
+  /** Minutos desde la medianoche; sólo con `specific_hours`. */
+  openTimeInMinutes?: number;
+  closeTimeInMinutes?: number;
+}
+
+/** R0b · Lo que Smarty empuja al perfil de WhatsApp Business de la línea: dirección, descripción, email, sitios (el Maps va acá) y horario. */
+export class BusinessProfileDto {
+  address?: string;
+  description?: string;
+  email?: string;
+  websites?: string[];
+  hours?: { timezone: string; days: DiaDelHorarioDto[] };
+}
+
 export class QuickReplyDto {
   /** El atajo, sin la barra: «gracias» aparece como /gracias. */
   shortcut: string;

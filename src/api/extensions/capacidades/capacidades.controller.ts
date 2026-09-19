@@ -1,6 +1,7 @@
 import { InstanceDto } from '@api/dto/instance.dto';
 
 import {
+  BusinessProfileDto,
   ProductCreateDto,
   ProductDeleteDto,
   ProductUpdateDto,
@@ -20,6 +21,10 @@ export class CapacidadesController {
 
   public sendProduct(instance: InstanceDto, data: SendProductDto) {
     return this.capacidadesService.sendProduct(instance, data);
+  }
+
+  public updateBusinessProfile(instance: InstanceDto, data: BusinessProfileDto) {
+    return this.capacidadesService.updateBusinessProfile(instance, data);
   }
 
   public quickReply(instance: InstanceDto, data: QuickReplyDto) {

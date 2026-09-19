@@ -5,6 +5,7 @@ import { RequestHandler, Router } from 'express';
 import { JSONSchema7 } from 'json-schema';
 
 import {
+  BusinessProfileDto,
   ProductCreateDto,
   ProductUpdateDto,
   QuickReplyDto,
@@ -13,6 +14,7 @@ import {
   SendProductDto,
 } from './capacidades.dto';
 import {
+  businessProfileSchema,
   productCreateSchema,
   productUpdateSchema,
   quickReplySchema,
@@ -61,6 +63,9 @@ export class CapacidadesChatRouter extends RouterBroker {
   constructor(...guards: RequestHandler[]) {
     super();
     post(this, 'quickReply', guards, quickReplySchema, QuickReplyDto, (i, d) => capacidadesController.quickReply(i, d));
+    post(this, 'updateBusinessProfile', guards, businessProfileSchema, BusinessProfileDto, (i, d) =>
+      capacidadesController.updateBusinessProfile(i, d),
+    ); // R0b · dirección, descripción, sitios y horario del perfil de WhatsApp Business
     post(this, 'removeQuickReply', guards, removeQuickReplySchema, RemoveQuickReplyDto, (i, d) =>
       capacidadesController.removeQuickReply(i, d),
     );
