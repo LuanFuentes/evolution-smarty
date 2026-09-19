@@ -184,3 +184,21 @@ test('elIqDeBorrarProductos arma el product_catalog_delete de Baileys y losBorra
   assert.equal(losBorradosDelNodo({ tag: 'iq', attrs: {}, content: [{ tag: 'product_catalog_delete', attrs: { deleted_count: '2' } }] }), 2);
   assert.equal(losBorradosDelNodo({ tag: 'iq', attrs: {}, content: [] }), 0);
 });
+
+// ─── R0b · el perfil de WhatsApp Business desde Smarty ───
+import { elPerfilParaBaileys } from '@api/extensions/capacidades/capacidades.puro';
+
+test('elPerfilParaBaileys: sólo lo que vino (delta), sitios hasta 2, horario en la forma de Baileys', () => {
+  const p = elPerfilParaBaileys({
+    address: '  Paradero Mercado de Lurín  ',
+    description: '',
+    websites: ['https://maps.app.goo.gl/x', '', 'https://wa.me/c/51941135592', 'https://extra'],
+    hours: { timezone: 'America/Lima', days: [{ day: 'monday', mode: 'specific_hours', openTimeInMinutes: 780, closeTimeInMinutes: 1320 }, { day: 'sunday', mode: 'open_24h' }] },
+  });
+  assert.deepEqual(p, {
+    address: 'Paradero Mercado de Lurín',
+    websites: ['https://maps.app.goo.gl/x', 'https://wa.me/c/51941135592'],
+    hours: { timezone: 'America/Lima', days: [{ day: 'monday', mode: 'specific_hours', openTimeInMinutes: 780, closeTimeInMinutes: 1320 }, { day: 'sunday', mode: 'open_24h' }] },
+  });
+  assert.deepEqual(elPerfilParaBaileys({}), {});
+});

@@ -40,3 +40,44 @@ export function elDuenoDelCatalogo(pedido: string | undefined, propio: string | 
   if (!jid) throw new Error('No hay JID del dueño del catálogo (la línea no informó su usuario)');
   return jid.replace(/:\d+@/, '@').replace(/@c\.us$/, '@s.whatsapp.net');
 }
+
+/** R0b · Lo que llegó del perfil, en la forma de Baileys `updateBussinesProfile`; lo que no vino no se toca (mutation delta). Puro. */
+export function elPerfilParaBaileys(p: {
+  address?: string;
+  description?: string;
+  email?: string;
+  websites?: string[];
+  hours?: {
+    timezone: string;
+    days: Array<{ day: string; mode: string; openTimeInMinutes?: number; closeTimeInMinutes?: number }>;
+  };
+}): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  const texto = (v: unknown) => (typeof v === 'string' && v.trim() ? v.trim() : undefined);
+  if (texto(p.address)) out.address = texto(p.address);
+  if (texto(p.description)) out.description = texto(p.description);
+  if (texto(p.email)) out.email = texto(p.email);
+  if (Array.isArray(p.websites)) {
+    const sitios = p.websites
+      .map(texto)
+      .filter((s): s is string => Boolean(s))
+      .slice(0, 2);
+    if (sitios.length) out.websites = sitios;
+  }
+  if (p.hours && Array.isArray(p.hours.days) && p.hours.days.length) {
+    out.hours = {
+      timezone: p.hours.timezone,
+      days: p.hours.days.map((d) =>
+        d.mode === 'specific_hours'
+          ? {
+              day: d.day,
+              mode: d.mode,
+              openTimeInMinutes: d.openTimeInMinutes ?? 0,
+              closeTimeInMinutes: d.closeTimeInMinutes ?? 0,
+            }
+          : { day: d.day, mode: d.mode },
+      ),
+    };
+  }
+  return out;
+}

@@ -53,6 +53,48 @@ export const sendProductSchema: JSONSchema7 = {
   anyOf: [{ required: ['number'] }, { required: ['jid'] }],
 };
 
+export const businessProfileSchema: JSONSchema7 = {
+  $id: v4(),
+  type: 'object',
+  properties: {
+    address: { type: 'string', maxLength: 500 },
+    description: { type: 'string', maxLength: 512 },
+    email: { type: 'string', maxLength: 200 },
+    websites: { type: 'array', maxItems: 2, items: { type: 'string', maxLength: 500 } },
+    hours: {
+      type: 'object',
+      properties: {
+        timezone: { type: 'string', minLength: 1 },
+        days: {
+          type: 'array',
+          maxItems: 7,
+          items: {
+            type: 'object',
+            properties: {
+              day: {
+                type: 'string',
+                enum: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+              },
+              mode: { type: 'string', enum: ['open_24h', 'appointment_only', 'specific_hours'] },
+              openTimeInMinutes: { type: 'integer', minimum: 0, maximum: 1439 },
+              closeTimeInMinutes: { type: 'integer', minimum: 0, maximum: 1440 },
+            },
+            required: ['day', 'mode'],
+          },
+        },
+      },
+      required: ['timezone', 'days'],
+    },
+  },
+  anyOf: [
+    { required: ['address'] },
+    { required: ['description'] },
+    { required: ['email'] },
+    { required: ['websites'] },
+    { required: ['hours'] },
+  ],
+};
+
 export const quickReplySchema: JSONSchema7 = {
   $id: v4(),
   type: 'object',

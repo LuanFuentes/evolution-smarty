@@ -22,6 +22,7 @@ import { createJid } from '@utils/createJid';
 import type { AnyMessageContent } from 'baileys';
 
 import {
+  BusinessProfileDto,
   ProductCreateDto,
   ProductDeleteDto,
   ProductUpdateDto,
@@ -30,7 +31,14 @@ import {
   SendAlbumDto,
   SendProductDto,
 } from './capacidades.dto';
-import { comoMedio, comoProductoEnviable, elDuenoDelCatalogo, esperar, esVideo } from './capacidades.puro';
+import {
+  comoMedio,
+  comoProductoEnviable,
+  elDuenoDelCatalogo,
+  elPerfilParaBaileys,
+  esperar,
+  esVideo,
+} from './capacidades.puro';
 
 const BAD_GATEWAY = 502;
 const SERVICE_UNAVAILABLE = 503;
@@ -38,6 +46,12 @@ const SERVICE_UNAVAILABLE = 503;
 class BadGatewayException {
   constructor(...objectError: any[]) {
     throw { status: BAD_GATEWAY, error: 'Bad Gateway', message: objectError.length > 0 ? objectError : undefined };
+  }
+}
+
+class GatewayTimeoutException {
+  constructor(...objectError: any[]) {
+    throw { status: 504, error: 'Gateway Timeout', message: objectError.length > 0 ? objectError : undefined };
   }
 }
 
@@ -120,6 +134,19 @@ export class CapacidadesService {
         footer: data.footer,
       } as AnyMessageContent);
       return { key: enviado?.key ?? null, productId: data.product.productId, businessOwnerJid };
+    });
+  }
+
+  /**
+   * R0b · El perfil de WhatsApp Business de la línea, escrito desde Smarty (dirección, descripción, email, sitios,
+   * horario). Es la familia `w:biz`, que sí contesta por QR (a diferencia de `w:biz:catalog`); igual, `undefined` = 504.
+   */
+  public updateBusinessProfile({ instanceName }: InstanceDto, data: BusinessProfileDto) {
+    return this.conElSocket(instanceName, 'updateBussinesProfile', async (client) => {
+      const r = await client.updateBussinesProfile(elPerfilParaBaileys(data));
+      if (r === undefined || r === null)
+        throw new GatewayTimeoutException('WhatsApp no contestó la actualización del perfil (w:biz)');
+      return { ok: true, campos: Object.keys(elPerfilParaBaileys(data)) };
     });
   }
 
